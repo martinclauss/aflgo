@@ -82,28 +82,40 @@ cp /usr/local/lib/LLVMgold.so /usr/lib/bfd-plugins
 
 $apt_get install -y python3-dev python3-pip pkg-config autoconf automake libtool-bin gawk libboost-all-dev
 
+pip_install="python3 -m pip install"
+pip_install_break="python3 -m pip install --break-system-packages"
+
 # See https://networkx.org/documentation/stable/release/index.html
-case `python3 -c 'import sys; print(sys.version_info[:][1])'` in
+python_minor_version="$(python3 -c 'import sys; print(sys.version_info[:][1])')"
+
+case "$python_minor_version" in
     [01])
-        python3 -m pip install 'networkx<1.9';;
+        networkx_version='networkx<1.9';;
     2)
-        python3 -m pip install 'networkx<1.11';;
+        networkx_version='networkx<1.11';;
     3)
-        python3 -m pip install 'networkx<2.0';;
+        networkx_version='networkx<2.0';;
     4)
-        python3 -m pip install 'networkx<2.2';;
+        networkx_version='networkx<2.2';;
     5)
-        python3 -m pip install 'networkx<2.5';;
+        networkx_version='networkx<2.5';;
     6)
-        python3 -m pip install 'networkx<2.6';;
+        networkx_version='networkx<2.6';;
     7)
-        python3 -m pip install 'networkx<2.7';;
+        networkx_version='networkx<2.7';;
     8)
-        python3 -m pip install 'networkx<=3.1';;
+        networkx_version='networkx<=3.1';;
     *)
-        python3 -m pip install networkx;;
+        networkx_version='networkx';;
 esac
-python3 -m pip install pydot pydotplus
+
+pip_packages="pydot pydotplus"
+
+if [ $python_minor_version -ge 11 ]; then
+        $pip_install_break $networkx_version $pip_packages
+else
+        $pip_install $networkx_version $pip_packages
+fi
 
 ##############################
 ### Build AFLGo components ###
